@@ -40,13 +40,11 @@ Param={
   "width":10,
   "span":150,
   "distance":550,
+  "align":"x"
 }
 Refs={}
 
-tr1=Transform()
-tr1.rotation.w=np.sqrt(2)/2
-tr1.rotation.y=np.sqrt(2)/2
-color=(0.1,0.1,0.1)
+color=(0.1,0.1,0.1,0.1)
 
 while not rospy.is_shutdown():
   rospy.Rate(5).sleep() #1 Hz
@@ -58,13 +56,32 @@ while not rospy.is_shutdown():
     Refs=rospy.get_param(Param["refs"])
   except Exception as e:
     pass
-  tr1.translation.x=Param["base"] if "base" not in Refs else Refs["base"]
+
+  tr1=Transform()
+  tbase=Param["base"] if "base" not in Refs else Refs["base"]
+  if Refs["align"]=="y":
+    tr1.rotation.x=np.sqrt(2)/2
+    tr1.rotation.w=np.sqrt(2)/2
+    tr1.translation.y=tbase
+  else:
+    tr1.rotation.y=np.sqrt(2)/2
+    tr1.rotation.w=np.sqrt(2)/2
+    tr1.translation.x=tbase
   tr1.translation.z=Param["distance"] if "distance" not in Refs else Refs["distance"]
   span=Param["span"] if "span" not in Refs else Refs["span"]
+  cwid=Param["width"] if "width" not in Refs else Refs["width"]
   T1=tflib.toRT(tr1)
-  markers.publishPlane(T1,span,span,color,1.0) # pose, color, scale, lifetime
+  if cwid>0:
+    markers.alpha=0.33
+    markers.publishPlane(T1,span,span,color,1.0) # pose, color, scale, lifetime
   tr2=copy.copy(tr1)
   offset=Param["offset"] if "offset" not in Refs else Refs["offset"]
-  tr2.translation.x=tr2.translation.x+offset
+  if Refs["align"]=="y":
+    tr2.translation.y=tr2.translation.y+offset
+  else:
+    tr2.translation.x=tr2.translation.x+offset
   T2=tflib.toRT(tr2)
-  markers.publishPlane(T2,span,span,color,1.0)
+  if cwid>0:
+    markers.alpha=0.33
+    markers.publishPlane(T2,span,span,color,1.0)
+

@@ -638,6 +638,8 @@ class RvizMarkers(object):
             cube_scale = scale
         elif type(scale) == float:
             cube_scale = Vector3(scale, scale, scale)
+        elif type(scale) == list or type(scale) == tuple:
+            cube_scale = Vector3(scale[0], scale[1], scale[2])
         else:
             rospy.logerr("Scale is unsupported type '%s' in publishCube()", type(scale).__name__)
             return False
@@ -1012,7 +1014,7 @@ class RvizMarkers(object):
         # Set the scale
         rectangle_marker.scale.x = depth
         rectangle_marker.scale.y = width
-        rectangle_marker.scale.z = 0.0
+        rectangle_marker.scale.z = 1.0
 
         return self.publishMarker(rectangle_marker)
 
